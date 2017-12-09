@@ -1,0 +1,53 @@
+
+#compiler
+CXX = g++
+CC = gcc
+LDXX = g++
+LD = gcc
+AR = ar
+CP = cp
+SCP = scp
+
+SERVER_OUTPUT = selfsched_server
+CLIENT_OUTPUT = selfsched_client
+
+ALL_OUTPUT = $(SERVER_OUTPUT) $(CLIENT_OUTPUT)
+
+MAIN_SERVER_C_SOURCES=$(shell find src -name "*.c" | grep -vi client)
+MAIN_SERVER_C_OBJECTS=$(MAIN_SERVER_C_SOURCES:.c=.o)
+MAIN_SERVER_CPP_SOURCES=$(shell find src -name "*.cpp" | grep -vi client)
+MAIN_SERVER_CPP_OBJECTS=$(MAIN_SERVER_CPP_SOURCES:.cpp=.o)
+
+MAIN_CLIENT_C_SOURCES=$(shell find src -name "*.c" | grep -vi server)
+MAIN_CLIENT_C_OBJECTS=$(MAIN_CLIENT_C_SOURCES:.c=.o)
+MAIN_CLIENT_CPP_SOURCES=$(shell find src -name "*.cpp" | grep -vi server)
+MAIN_CLIENT_CPP_OBJECTS=$(MAIN_CLIENT_CPP_SOURCES:.cpp=.o)
+
+MAIN_SERVER_APP_OBJECTS=${MAIN_SERVER_C_OBJECTS} ${MAIN_SERVER_CPP_OBJECTS}
+MAIN_CLIENT_APP_OBJECTS=${MAIN_CLIENT_C_OBJECTS} ${MAIN_CLIENT_CPP_OBJECTS}
+
+INCLUDE= -Isrc -Isrc/server -Isrc/client
+
+DEFINES=
+
+CFLAGS= -Wall
+
+CPPFLAGS= -Wall
+
+all : $(ALL_OUTPUT)
+
+$(SERVER_OUTPUT): ${MAIN_SERVER_APP_OBJECTS}
+	$(CROSS_COMPILE)$(CC) $(LINK) ${MAIN_SERVER_APP_OBJECTS} $(DEFINES) -o $(SERVER_OUTPUT)
+
+$(CLIENT_OUTPUT): ${MAIN_CLIENT_APP_OBJECTS}
+	$(CROSS_COMPILE)$(CC) $(LINK) ${MAIN_CLIENT_APP_OBJECTS} $(DEFINES) -o $(CLIENT_OUTPUT)
+
+%.o : %.c 
+	$(CROSS_COMPILE)$(CC) $(CFLAGS) $(INCLUDE) $(DEFINES) -c $< -o $@
+ 
+%.o : %.cpp
+	$(CROSS_COMPILE)$(CXX) $(CPPFLAGS) $(INCLUDE) $(DEFINES) -c $< -o $@
+
+clean:
+	rm -f ${MAIN_SERVER_APP_OBJECTS} ${MAIN_CLIENT_APP_OBJECTS} $(ALL_OUTPUT)
+
